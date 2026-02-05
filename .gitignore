@@ -1,14 +1,18 @@
 # Dependencies
 node_modules/
-dist/
+package-lock.json
 
-# Environment & Secrets
+# Build output
+dist/
+build/
+
+# Environment variables & secrets
 .env
 .env.local
 .env.production
 .env.*.local
 
-# TLS/SSL Certificates & Keys (SECURITY)
+# TLS/SSL Certificates & Keys
 certs/
 *.key
 *.crt
@@ -17,30 +21,29 @@ certs/
 *.pfx
 *.csr
 
-# Data storage (contains user data & agent keys)
+# Data & Secrets (gitignore all JSON except configs)
 data/
-!data/.gitkeep
 agent-keys.json
 users.json
 
-# Workspace files (OpenClaw agent-specific)
-AGENTS.md
-SOUL.md
-TOOLS.md
-USER.md
-IDENTITY.md
-HEARTBEAT.md
-BOOTSTRAP.md
-memory/
-
-# Logs
-*.log
-npm-debug.log*
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Temporary
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+
+# Temporary files
 tmp/
+temp/
 *.tmp

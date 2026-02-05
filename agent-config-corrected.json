@@ -1,0 +1,286 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-sonnet-4-5-20250929"
+      },
+      "models": {
+        "anthropic/claude-sonnet-4-5-20250929": {},
+        "anthropic/claude-haiku-4-5-20251001": {},
+        "anthropic/claude-opus-4-5-20251101": {}
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 20
+      },
+      "sandbox": {
+        "mode": "off"
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "name": "Dr. Shellbourne",
+        "default": true,
+        "workspace": "/home/sky/.openclaw/workspace",
+        "sandbox": {
+          "mode": "off"
+        },
+        "subagents": {
+          "allowAgents": ["orchestrator", "pm", "architect", "frontend-dev", "backend-dev", "devops", "qa-tester", "docs-writer"]
+        }
+      },
+      {
+        "id": "orchestrator",
+        "name": "Mission Control Orchestrator",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/coordination",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "sessions_list",
+            "sessions_spawn",
+            "sessions_send",
+            "sessions_history",
+            "session_status",
+            "message",
+            "memory_search",
+            "memory_get",
+            "cron"
+          ],
+          "deny": [
+            "exec",
+            "process",
+            "edit",
+            "apply_patch",
+            "gateway",
+            "browser"
+          ]
+        },
+        "subagents": {
+          "allowAgents": ["pm", "architect", "frontend-dev", "backend-dev", "devops", "qa-tester", "docs-writer"]
+        }
+      },
+      {
+        "id": "pm",
+        "name": "Product Manager",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/planning",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "sessions_send",
+            "sessions_list",
+            "message",
+            "memory_search",
+            "memory_get",
+            "web_search",
+            "web_fetch"
+          ],
+          "deny": [
+            "exec",
+            "process",
+            "gateway",
+            "cron",
+            "browser",
+            "sessions_spawn"
+          ]
+        }
+      },
+      {
+        "id": "architect",
+        "name": "System Architect",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/architecture",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "sessions_send",
+            "web_search",
+            "web_fetch",
+            "memory_search",
+            "memory_get"
+          ],
+          "deny": [
+            "exec",
+            "process",
+            "gateway",
+            "cron",
+            "browser",
+            "sessions_spawn"
+          ]
+        }
+      },
+      {
+        "id": "frontend-dev",
+        "name": "Frontend Developer",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/frontend",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "apply_patch",
+            "exec",
+            "process",
+            "sessions_send",
+            "web_search",
+            "web_fetch",
+            "browser"
+          ],
+          "deny": [
+            "gateway",
+            "cron",
+            "message",
+            "sessions_spawn"
+          ]
+        }
+      },
+      {
+        "id": "backend-dev",
+        "name": "Backend Developer",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/backend",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "apply_patch",
+            "exec",
+            "process",
+            "sessions_send",
+            "web_search",
+            "web_fetch"
+          ],
+          "deny": [
+            "gateway",
+            "cron",
+            "browser",
+            "message",
+            "sessions_spawn"
+          ]
+        }
+      },
+      {
+        "id": "devops",
+        "name": "DevOps Engineer",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/infra",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "exec",
+            "process",
+            "sessions_send",
+            "web_search"
+          ],
+          "deny": [
+            "cron",
+            "browser",
+            "message",
+            "sessions_spawn",
+            "gateway"
+          ]
+        }
+      },
+      {
+        "id": "qa-tester",
+        "name": "QA Tester",
+        "model": {
+          "primary": "anthropic/claude-sonnet-4-5-20250929"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/tests",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "exec",
+            "process",
+            "browser",
+            "sessions_send",
+            "web_search"
+          ],
+          "deny": [
+            "edit",
+            "apply_patch",
+            "gateway",
+            "cron",
+            "message",
+            "sessions_spawn"
+          ]
+        }
+      },
+      {
+        "id": "docs-writer",
+        "name": "Documentation Writer",
+        "model": {
+          "primary": "openai/gpt-4o"
+        },
+        "workspace": "/home/sky/.openclaw/workspace/mission-control/docs",
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "allow": [
+            "read",
+            "write",
+            "edit",
+            "sessions_send",
+            "web_search",
+            "browser"
+          ],
+          "deny": [
+            "exec",
+            "process",
+            "gateway",
+            "cron",
+            "message",
+            "sessions_spawn"
+          ]
+        }
+      }
+    ]
+  }
+}

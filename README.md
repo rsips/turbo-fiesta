@@ -1,534 +1,323 @@
-# Mission Control Backend API
+# Mission Control
 
-Express.js API that adapts OpenClaw Gateway data for the Mission Control frontend.
+Real-time monitoring dashboard for OpenClaw agents. Monitor agent status, sessions, and activities across your infrastructure.
 
 ## Features
 
-### Read Operations
-- **GET /api/agents** - List all agents with status, current task, and metadata
-- **GET /api/agents/:id** - Get detailed information for a specific agent
-- **GET /health** - Health check endpoint with Gateway connectivity status
+### Core Functionality
+- 👀 **Agent Monitoring** - Real-time view of all active OpenClaw agents
+- 📊 **Session Tracking** - Monitor active sessions and agent activities
+- 💬 **Message History** - View message flows and agent interactions
+- 🔄 **Real-time Updates** - WebSocket connection for live agent status
+- 📱 **Responsive Design** - Works on desktop and mobile devices
 
-### Control Operations (New in Phase 2! 🚀)
-- **POST /api/agents/:id/stop** - Check agent heartbeat status (with CLI guidance)
-- **POST /api/agents/:id/restart** - Check agent heartbeat status for restart
-- **POST /api/agents/:id/message** - Send a message to a specific agent session
-- **GET /api/agents/:id/settings** - Get agent configuration settings
+### Security
+- 🔐 **TLS/HTTPS Support** - Encrypted communications (self-signed for dev, Let's Encrypt for prod)
+- 🔑 **Agent API Keys** - Secure agent-to-server authentication
+- 🛡️ **JWT Authentication** - Secure user authentication for web UI
+- 🚫 **CORS Protection** - Configurable cross-origin request filtering
+- 📝 **Environment Secrets** - Secure credential management
 
-### Infrastructure
-- **Schema transformation** - Converts Gateway format to Mission Control format
-- **In-memory caching** - 5-second TTL to reduce Gateway load
-- **Mock data support** - Develop without Gateway dependency
+## Architecture
+
+```
+┌─────────────────────┐
+│  Mission Control    │
+│    Frontend         │
+│  (React + Vite)     │
+└──────────┬──────────┘
+           │ HTTPS
+           │ WebSocket
+┌──────────▼──────────┐
+│  Mission Control    │
+│     Backend         │
+│  (Express + WS)     │
+└──────────┬──────────┘
+           │ Agent API Keys
+           │
+    ┌──────┴──────┐
+    │             │
+┌───▼───┐   ┌────▼────┐
+│ Agent │   │  Agent  │
+│   1   │   │    2    │
+└───────┘   └─────────┘
+```
 
 ## Quick Start
 
-### 1. Install Dependencies
+### Prerequisites
+- Node.js 18+
+- OpenClaw Gateway running (or use mock data)
+
+### Development Setup
 
 ```bash
+# Clone repository
+git clone <repo-url>
+cd mission-control
+
+# Backend setup
+cd backend
 npm install
-```
-
-### 2. Configure Environment
-
-Copy `.env.example` to `.env` and configure:
-
-```bash
 cp .env.example .env
-```
+npm run dev
 
-**Default configuration uses mock data** - set `USE_MOCK_DATA=false` to connect to real Gateway.
-
-### 3. Development Mode
-
-```bash
+# Frontend setup (in another terminal)
+cd frontend
+npm install
+cp .env.example .env
 npm run dev
 ```
 
-Server starts at http://localhost:8080 with hot reload.
+**Access:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8080
 
-### 4. Test Endpoints
+### With HTTPS (Development)
 
-**Health check:**
 ```bash
-curl http://localhost:8080/health
+# Generate self-signed certificates
+cd backend
+npm run generate-certs
+
+# Start backend with HTTPS
+npm run dev:https
+
+# Start frontend with HTTPS (optional)
+cd ../frontend
+# Edit .env: VITE_TLS_ENABLED=true
+npm run dev
 ```
 
-**List all agents:**
-```bash
-curl http://localhost:8080/api/agents
-```
+## Documentation
 
-**Get specific agent:**
-```bash
-curl http://localhost:8080/api/agents/agent:main:msteams:...
-```
+- **[Setup Guide](docs/SETUP.md)** - Complete setup instructions for dev and production
+- **[Security Guide](docs/SECURITY.md)** - TLS/HTTPS setup, agent authentication, and security best practices
+- **[Agent Setup](docs/AGENT_SETUP.md)** - Configure OpenClaw agents to connect to Mission Control
 
 ## Project Structure
 
 ```
-src/
-├── server.ts              # Express app entry point
-├── types/
-│   ├── agent.ts          # Mission Control types (frontend-facing)
-│   └── gateway.ts        # OpenClaw Gateway types (backend-facing)
-├── routes/
-│   └── agents.ts         # Agent API endpoints
-├── services/
-│   ├── gateway.ts        # Gateway HTTP client
-│   ├── transformer.ts    # Schema transformation logic
-│   └── mockData.ts       # Mock Gateway responses for development
-├── utils/
-│   ├── cache.ts          # Simple in-memory cache (5s TTL)
-│   └── logger.ts         # Logging utility
-└── config/
-    └── index.ts          # Configuration management
+mission-control/
+├── backend/                 # Express.js API server
+│   ├── src/
+│   │   ├── server.ts       # Main server entry point
+│   │   ├── config/         # Configuration
+│   │   ├── routes/         # API routes
+│   │   │   ├── auth.ts     # User authentication
+│   │   │   ├── agents.ts   # Agent data endpoints
+│   │   │   └── agentKeys.ts # Agent API key management
+│   │   ├── services/       # Business logic
+│   │   │   ├── agentKeyStore.ts  # Agent key management
+│   │   │   ├── gateway.ts  # OpenClaw Gateway client
+│   │   │   └── websocket.ts # WebSocket server
+│   │   ├── middleware/     # Express middleware
+│   │   │   ├── auth.ts     # User authentication
+│   │   │   └── agentAuth.ts # Agent authentication
+│   │   └── types/          # TypeScript types
+│   ├── scripts/
+│   │   ├── generate-certs.sh      # TLS certificate generator
+│   │   └── create-agent-key.ts    # CLI tool for agent keys
+│   └── certs/              # TLS certificates (gitignored)
+├── frontend/               # React + Vite frontend
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   ├── pages/          # Page components
+│   │   └── services/       # API clients
+│   └── public/             # Static assets
+└── docs/                   # Documentation
+    ├── SETUP.md            # Setup guide
+    ├── SECURITY.md         # Security documentation
+    └── AGENT_SETUP.md      # Agent configuration guide
 ```
 
-## API Documentation
+## Security
 
-### Read Endpoints
+Mission Control implements multiple layers of security:
 
-#### GET /api/agents
+1. **TLS/HTTPS** - All communications encrypted
+2. **User Authentication** - JWT-based auth for web UI
+3. **Agent API Keys** - Unique keys per agent with rotation support
+4. **CORS Protection** - Configurable origin restrictions
+5. **Environment Secrets** - Secure credential storage
 
-Returns list of all agents.
+### Creating Agent API Keys
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "agents": [
-      {
-        "id": "agent:main:msteams:...",
-        "name": "Main Agent",
-        "session_id": "agent:main:msteams:...",
-        "status": "busy",
-        "current_task": "Processing user request about calendar",
-        "task_started_at": "2026-02-05T20:01:25Z",
-        "last_activity": "2026-02-05T20:01:30Z",
-        "started_at": "2026-02-05T16:30:00Z",
-        "uptime_seconds": 12690,
-        "metadata": {
-          "channel": "msteams",
-          "model": "claude-sonnet-4-5",
-          "host": "openclaw-head"
-        }
-      }
-    ],
-    "count": 1,
-    "timestamp": "2026-02-05T20:03:00Z"
-  }
-}
+```bash
+# Interactive CLI tool
+cd backend
+npm run create-agent-key
+
+# OR via API (requires admin login)
+curl -X POST https://mission-control.example.com/api/agent-keys \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"agent-1","expiresInDays":365}'
 ```
 
-**Status Values:**
-- `online` - Agent is running and idle
-- `busy` - Agent is actively processing a task
-- `offline` - Agent disconnected or stopped
-- `error` - Agent in error state
+See [SECURITY.md](docs/SECURITY.md) for comprehensive security documentation.
 
-#### GET /api/agents/:id
+## Production Deployment
 
-Returns detailed information for a specific agent.
+### Quick Production Setup
 
-**Parameters:**
-- `id` - Agent session ID
+```bash
+# 1. Build application
+cd backend && npm install && npm run build
+cd ../frontend && npm install && npm run build
 
-**Response:** Same as single agent object above, wrapped in success envelope.
+# 2. Configure environment
+cd backend
+cp .env.example .env
+# Edit .env with production values (change JWT_SECRET!)
 
-**Error Response (404):**
-```json
-{
-  "success": false,
-  "error": {
-    "code": "AGENT_NOT_FOUND",
-    "message": "Agent not found or no longer active",
-    "details": "No agent found with ID: ..."
-  }
-}
+# 3. Set up reverse proxy (Caddy or Nginx)
+# See docs/SETUP.md for detailed instructions
+
+# 4. Create systemd service
+sudo systemctl enable mission-control
+sudo systemctl start mission-control
 ```
 
-#### GET /health
+**Recommended Architecture:**
+- **Reverse Proxy** (Caddy/Nginx) - TLS termination, static file serving
+- **Mission Control Backend** - API and WebSocket server
+- **Let's Encrypt** - Free, auto-renewing TLS certificates
 
-Health check endpoint.
+See [SETUP.md](docs/SETUP.md) for detailed production deployment instructions.
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "timestamp": "2026-02-05T20:03:00Z",
-  "gateway": "connected",
-  "config": {
-    "gatewayUrl": "http://localhost:18789",
-    "useMockData": false
-  }
-}
+## Development
+
+### Backend Development
+
+```bash
+cd backend
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+
+# Development with hot reload
+npm run dev
 ```
 
-### Control Endpoints (Phase 2)
+### Frontend Development
 
-#### POST /api/agents/:id/stop
+```bash
+cd frontend
 
-Check agent heartbeat status and get guidance on how to disable it via CLI.
+# Development server
+npm run dev
 
-**Note:** OpenClaw doesn't expose a direct API to disable agent heartbeats. This endpoint provides visibility and CLI instructions.
+# Build for production
+npm run build
 
-**Parameters:**
-- `id` - Agent session ID or session key
+# Preview production build
+npm run preview
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "agentId": "main",
-    "action": "stop-check",
-    "heartbeatEnabled": true,
-    "heartbeatInterval": "30m",
-    "message": "Agent heartbeat is currently enabled. Use CLI to disable: openclaw system heartbeat disable",
-    "timestamp": "2026-02-05T20:30:00Z"
-  }
-}
+# Lint
+npm run lint
 ```
 
-**Use Cases:**
-- Check if an agent's heartbeat is enabled
-- Get CLI instructions to disable heartbeat
-- Monitor heartbeat status before maintenance
+## API Endpoints
 
-#### POST /api/agents/:id/restart
+### User Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/me` - Get current user info
 
-Check agent heartbeat status and get guidance on how to enable it via CLI.
+### Agent Data (Requires JWT)
+- `GET /api/agents` - List all agents
+- `GET /api/agents/:id` - Get agent details
+- `GET /api/agents/:id/sessions` - Get agent sessions
 
-**Note:** OpenClaw doesn't expose a direct API to enable agent heartbeats. This endpoint provides visibility and CLI instructions.
+### Agent API Key Management (Requires JWT + Admin)
+- `POST /api/agent-keys` - Create new agent API key
+- `GET /api/agent-keys` - List all agent keys
+- `GET /api/agent-keys/:id` - Get key details
+- `POST /api/agent-keys/:id/revoke` - Revoke key
+- `DELETE /api/agent-keys/:id` - Delete key
 
-**Parameters:**
-- `id` - Agent session ID or session key
+### Health Check
+- `GET /health` - Server health status
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "agentId": "backend-dev",
-    "action": "restart-check",
-    "heartbeatEnabled": false,
-    "heartbeatInterval": "disabled",
-    "message": "Agent heartbeat is disabled. Use CLI to enable: openclaw system heartbeat enable",
-    "timestamp": "2026-02-05T20:30:00Z"
-  }
-}
-```
+## Environment Variables
 
-**Use Cases:**
-- Check if an agent's heartbeat is disabled
-- Get CLI instructions to enable heartbeat
-- Verify heartbeat status after changes
-
-#### POST /api/agents/:id/message
-
-Send a message to a specific agent session.
-
-**Parameters:**
-- `id` - Agent session ID or session key
-
-**Request Body:**
-```json
-{
-  "message": "Check inbox and summarize important emails"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "sessionId": "8e8aaf0c-d455-42af-ba7c-6a668f5bd8ee",
-    "agentId": "main",
-    "action": "message",
-    "result": "Message sent to agent session",
-    "timestamp": "2026-02-05T20:30:00Z"
-  }
-}
-```
-
-**Use Cases:**
-- Send commands to specific agent instances
-- Trigger agent actions from external systems
-- Inject tasks into running sessions
-
-#### GET /api/agents/:id/settings
-
-Get agent configuration settings including model, context tokens, heartbeat settings, and token usage.
-
-**Parameters:**
-- `id` - Agent session ID or session key
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "agentId": "main",
-    "action": "settings",
-    "settings": {
-      "agentId": "main",
-      "model": "claude-opus-4-5-20251101",
-      "contextTokens": 200000,
-      "heartbeat": {
-        "enabled": true,
-        "interval": "30m",
-        "intervalMs": 1800000
-      },
-      "session": {
-        "totalTokens": 147589,
-        "remainingTokens": 52411,
-        "percentUsed": 74
-      }
-    },
-    "timestamp": "2026-02-05T20:30:00Z"
-  }
-}
-```
-
-**Settings Provided:**
-- `model` - Current AI model in use
-- `contextTokens` - Maximum context window size
-- `heartbeat` - Heartbeat configuration (enabled, interval)
-- `session` - Token usage statistics
-
-**Use Cases:**
-- Monitor agent resource usage
-- Check current model and capabilities
-- View heartbeat configuration
-- Track context window utilization
-
-### Error Responses
-
-All endpoints return consistent error responses:
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human-readable error message",
-    "details": "Additional context or technical details"
-  }
-}
-```
-
-**Common Error Codes:**
-- `AGENT_NOT_FOUND` (404) - Agent/session doesn't exist
-- `SESSION_NOT_FOUND` (404) - Session ID not found
-- `INVALID_AGENT_ID` (400) - Invalid ID format
-- `INVALID_MESSAGE` (400) - Empty or invalid message
-- `INVALID_SETTINGS` (400) - Empty or invalid settings object
-- `STOP_FAILED` (500) - Failed to stop agent
-- `RESTART_FAILED` (500) - Failed to restart agent
-- `MESSAGE_FAILED` (500) - Failed to send message
-- `SETTINGS_UPDATE_FAILED` (500) - Failed to update settings
-
-## Configuration
-
-Environment variables (see `.env.example`):
+### Backend
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | 8080 | Server port |
-| `GATEWAY_URL` | http://localhost:18789 | OpenClaw Gateway URL |
-| `GATEWAY_TIMEOUT` | 2000 | Gateway request timeout (ms) |
-| `CORS_ENABLED` | true | Enable CORS |
-| `CORS_ORIGIN` | * | CORS allowed origin |
-| `USE_MOCK_DATA` | true | Use mock data instead of Gateway |
-| `LOG_LEVEL` | info | Logging level (debug, info, warn, error) |
-| `NODE_ENV` | development | Environment |
+| `PORT` | `8080` | Backend server port |
+| `TLS_ENABLED` | `false` | Enable HTTPS |
+| `TLS_CERT_PATH` | `./certs/server.crt` | TLS certificate path |
+| `TLS_KEY_PATH` | `./certs/server.key` | TLS private key path |
+| `JWT_SECRET` | ⚠️ **required** | JWT signing secret |
+| `AGENT_AUTH_ENABLED` | `true` | Enable agent authentication |
+| `GATEWAY_URL` | `http://localhost:18789` | OpenClaw Gateway URL |
+| `CORS_ORIGIN` | `*` | CORS allowed origins |
+| `USE_MOCK_DATA` | `false` | Use mock data (dev) |
 
-## Schema Transformation
+See [.env.example](backend/.env.example) for all available options.
 
-The backend transforms OpenClaw Gateway's session format to Mission Control's agent format:
+### Frontend
 
-**Gateway → Mission Control Mapping:**
-
-| Mission Control Field | Derived From | Logic |
-|----------------------|--------------|-------|
-| `id` | `session` | Direct mapping |
-| `name` | `label` or `session` | Format label or parse session ID |
-| `status` | `current_message`, `last_activity` | Compute based on activity timestamps |
-| `current_task` | `current_message.content` | Truncate to 60 chars |
-| `last_activity` | `last_activity` | Convert Unix timestamp to ISO 8601 |
-| `started_at` | `created_at` | Convert Unix timestamp to ISO 8601 |
-| `uptime_seconds` | `created_at` | Calculate from start time |
-
-**Status Computation Logic:**
-
-```typescript
-// Priority order:
-1. Error state → 'error'
-2. Current message + fresh (<10s) → 'busy'
-3. Last activity recent (<30s) → 'online'
-4. Otherwise → 'offline'
-```
-
-## Development Workflow
-
-### Phase 1: Mock Development
-
-1. Start with `USE_MOCK_DATA=true` (default)
-2. Develop and test endpoints with mock data
-3. Mock data includes various agent states (online, busy, offline, error)
-
-### Phase 2: Gateway Integration
-
-1. Verify Gateway is running: `openclaw gateway status`
-2. Check Gateway port (default: 18789)
-3. Update `GATEWAY_URL` in `.env`
-4. Set `USE_MOCK_DATA=false`
-5. Test with real Gateway data
-
-### Investigating Gateway
-
-```bash
-# Check Gateway status
-openclaw gateway status
-
-# Check Gateway port
-netstat -tuln | grep 18789
-
-# Test Gateway endpoint directly
-curl http://localhost:18789/sessions
-
-# Or check Gateway CLI
-openclaw gateway sessions
-```
-
-**Note:** Gateway schema may differ from assumptions. Update `src/types/gateway.ts` and `src/services/transformer.ts` if needed.
-
-## Building for Production
-
-```bash
-# Build TypeScript
-npm run build
-
-# Start production server
-npm start
-```
-
-Built files are in `dist/`.
-
-## Caching Strategy
-
-- **In-memory cache** with 5-second TTL
-- Matches frontend polling interval (5s)
-- Reduces Gateway load: 10 users = 0.2 req/s (vs 2 req/s without cache)
-- Auto-cleanup every 60 seconds
-
-## Error Handling
-
-| Error Code | HTTP Status | Cause |
-|-----------|-------------|-------|
-| `GATEWAY_UNAVAILABLE` | 500 | Cannot connect to Gateway |
-| `GATEWAY_TIMEOUT` | 500 | Gateway slow to respond |
-| `GATEWAY_ERROR` | 500 | Gateway returned error |
-| `AGENT_NOT_FOUND` | 404 | Agent ID not found |
-| `NOT_FOUND` | 404 | Endpoint doesn't exist |
-| `INTERNAL_ERROR` | 500 | Unexpected server error |
-
-## Testing
-
-### Manual Testing Checklist
-
-- [ ] `/health` returns ok status
-- [ ] `/api/agents` returns agent list
-- [ ] `/api/agents/:id` returns single agent
-- [ ] `/api/agents/invalid-id` returns 404
-- [ ] Cache works (2nd request faster)
-- [ ] All agent statuses represented (online, busy, offline, error)
-- [ ] Timestamps in ISO 8601 format
-- [ ] Uptime calculations correct
-- [ ] Error handling graceful (Gateway down)
-
-### Test with Mock Data
-
-```bash
-# Start server with mock data
-USE_MOCK_DATA=true npm run dev
-
-# Test endpoints
-curl http://localhost:8080/health
-curl http://localhost:8080/api/agents | jq
-curl http://localhost:8080/api/agents/agent:main:msteams:group:19:0cc3b64020df41f9acf7ffac5cee62a9@thread.v2 | jq
-```
-
-### Test with Real Gateway
-
-```bash
-# Ensure Gateway is running
-openclaw gateway start
-
-# Start server with real Gateway
-USE_MOCK_DATA=false npm run dev
-
-# Test
-curl http://localhost:8080/health
-curl http://localhost:8080/api/agents | jq
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_URL` | - | Backend API URL (production) |
+| `VITE_BACKEND_TLS` | `false` | Backend uses HTTPS (dev) |
+| `VITE_TLS_ENABLED` | `false` | Enable HTTPS on dev server |
 
 ## Troubleshooting
 
-### "GATEWAY_UNAVAILABLE" Error
+### Agent Authentication Fails
 
-**Cause:** Cannot connect to Gateway
+**Issue:** `INVALID_AGENT_KEY` error
 
-**Solutions:**
-1. Check Gateway is running: `openclaw gateway status`
-2. Verify Gateway port: `netstat -tuln | grep 18789`
-3. Check `GATEWAY_URL` in `.env`
-4. Use mock data for development: `USE_MOCK_DATA=true`
+**Solution:**
+1. Verify API key is correct: `echo $MISSION_CONTROL_API_KEY`
+2. Check key is active: Admin panel → Agent Keys
+3. Verify key hasn't expired
+4. Ensure `X-Agent-Key` header is set
 
-### "GATEWAY_TIMEOUT" Error
+### TLS/SSL Certificate Errors
 
-**Cause:** Gateway slow to respond (>2s)
+**Development:** Accept self-signed certificate warning in browser
 
-**Solutions:**
-1. Increase timeout: `GATEWAY_TIMEOUT=5000`
-2. Check Gateway performance
-3. Use mock data during development
+**Production:** Ensure Let's Encrypt certificate is valid and renewed
 
-### Empty Agent List
+### WebSocket Connection Fails
 
-**Cause:** No agents running
+**Solution:**
+1. Check CORS settings include WebSocket upgrade
+2. Verify reverse proxy WebSocket configuration
+3. Check firewall allows WebSocket connections
 
-**Solutions:**
-1. Start an agent: Check OpenClaw documentation
-2. Use mock data: `USE_MOCK_DATA=true`
-3. Check Gateway has sessions: `curl http://localhost:18789/sessions`
-
-## Next Steps (Phase 2)
-
-Future enhancements:
-- WebSocket support for real-time updates
-- Server-side filtering and sorting
-- Pagination for 100+ agents
-- Agent control actions (stop, restart)
-- Persistent storage (database)
-- Authentication and authorization
+See [SECURITY.md](docs/SECURITY.md) for more troubleshooting tips.
 
 ## Contributing
 
-This is Phase 1 - focus on simplicity and speed.
-
-**Development priorities:**
-1. Get mock endpoints working ✅
-2. Integrate with Gateway
-3. Test schema transformation
-4. Optimize error handling
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ## License
 
-ISC
+[Add your license here]
+
+## Support
+
+For issues and questions:
+- **Documentation:** [docs/](docs/)
+- **Security Issues:** See [SECURITY.md](docs/SECURITY.md)
+- **Setup Help:** See [SETUP.md](docs/SETUP.md)
 
 ---
 
-**Questions?** Contact the Backend Developer agent or Orchestrator.
+Built with ❤️ for OpenClaw infrastructure management
