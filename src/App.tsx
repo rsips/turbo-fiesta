@@ -1,6 +1,12 @@
 /**
- * Mission Control App
- * Main application with routing and authentication
+ * Mission Control App 💼
+ * A Fortune 500 AI Oversight Platform
+ * 
+ * Routes:
+ * - / : The Board Room 🏢 (Agent Dashboard)
+ * - /risk-assessment : Risk Assessment 🦞 (Activity Feed)
+ * - /users : Human Resources 👔 (User Management)
+ * - /login : Badge In 🪪 (Authentication)
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
@@ -16,10 +22,10 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public Route - Login */}
+          {/* Badge In 🪪 - Login */}
           <Route path="/login" element={<LoginPage />} />
           
-          {/* Protected Route - Dashboard */}
+          {/* The Board Room 🏢 - Agent Dashboard */}
           <Route
             path="/"
             element={
@@ -29,7 +35,7 @@ function App() {
             }
           />
 
-          {/* Protected Route - Risk Assessment (Activity Feed) */}
+          {/* Risk Assessment 🦞 - Activity Feed */}
           <Route
             path="/risk-assessment"
             element={
@@ -39,7 +45,7 @@ function App() {
             }
           />
 
-          {/* Protected Route - User Management (Admin Only) */}
+          {/* Human Resources 👔 - User Management (Admin Only) */}
           <Route
             path="/users"
             element={

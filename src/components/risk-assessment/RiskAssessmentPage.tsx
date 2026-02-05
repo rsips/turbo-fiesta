@@ -1,6 +1,7 @@
 /**
- * Risk Assessment Page
- * Main activity feed showing agent reports from the field
+ * Risk Assessment Page 🦞
+ * Main activity feed showing what the risk is up to
+ * See agent reports from the field
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { RiskAssessmentHeader } from './RiskAssessmentHeader';
@@ -276,12 +277,12 @@ function RiskAssessmentEmptyState({ hasFilters }: { hasFilters: boolean }) {
         <Radio className="w-8 h-8 text-tkh-primary" />
       </div>
       <h3 className="text-xl font-bold text-tkh-blue-dark mb-2">
-        {hasFilters ? 'No Matching Activities' : 'No Activities Yet'}
+        {hasFilters ? 'No Risks Found' : 'No Risks Detected 🦞'}
       </h3>
       <p className="text-tkh-grey max-w-md mx-auto">
         {hasFilters
-          ? 'Try adjusting your filters to see more results.'
-          : "Agent activities will appear here as they report in from the field."}
+          ? 'Try adjusting your filters to find more risks.'
+          : "The risk is currently in the break room. Activities will appear here when it returns."}
       </p>
     </div>
   );

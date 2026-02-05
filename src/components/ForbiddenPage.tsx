@@ -1,5 +1,6 @@
 /**
- * Forbidden Page Component
+ * Access Denied Page Component 🚫
+ * Security will escort you back to your desk
  * Displayed when user doesn't have permission to access a resource
  */
 import { Link } from 'react-router-dom';
@@ -29,8 +30,8 @@ export function ForbiddenPage({
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Access Denied</h1>
-        <p className="text-lg text-red-600 font-medium mb-4">403 Forbidden</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Access Denied 🚫</h1>
+        <p className="text-lg text-red-600 font-medium mb-4">Your badge doesn't work here</p>
 
         {/* Message */}
         <p className="text-gray-600 mb-6">{message}</p>
@@ -73,13 +74,13 @@ export function ForbiddenPage({
             className="flex items-center justify-center gap-2 btn-primary"
           >
             <Home className="w-4 h-4" />
-            Dashboard
+            Back to Board Room 🏢
           </Link>
         </div>
 
         {/* Help Text */}
         <p className="mt-8 text-sm text-gray-500">
-          Need access? Contact your administrator to request the appropriate permissions.
+          Need access? File a ticket with HR 👔 to request the appropriate clearance level.
         </p>
       </div>
     </div>

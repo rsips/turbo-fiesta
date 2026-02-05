@@ -1,6 +1,7 @@
 /**
- * Dashboard Header Component
- * Shows Mission Control title, user info, and controls
+ * The Board Room Header Component 🏢
+ * Shows corporate branding, user info, and controls
+ * Where the real decisions get made
  */
 import { Link } from 'react-router-dom';
 import { RefreshCw, Activity, LogOut, User, Shield, Users, Eye, Radio } from 'lucide-react';
@@ -38,9 +39,9 @@ export function DashboardHeader({
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Activity className="w-8 h-8 text-tkh-primary" />
-            Mission Control
+            The Board Room 🏢
           </h1>
-          <p className="text-tkh-grey mt-1">Agent Status Dashboard</p>
+          <p className="text-tkh-grey mt-1">Where the real decisions get made</p>
         </div>
 
         {/* Right Section - User Info & Controls */}
@@ -69,21 +70,21 @@ export function DashboardHeader({
               <Link
                 to="/risk-assessment"
                 className="flex items-center gap-2 px-3 py-2 text-tkh-grey hover:text-white hover:bg-tkh-blue-medium transition-colors"
-                title="Agent Activity Feed"
+                title="Risk Assessment - See what the risk is up to"
               >
                 <Radio className="w-4 h-4" />
-                <span className="hidden md:inline text-sm">Risk Assessment</span>
+                <span className="hidden md:inline text-sm">Risk 🦞</span>
               </Link>
 
-              {/* Admin: User Management Link */}
+              {/* Admin: Human Resources Link */}
               {canManageUsers && (
                 <Link
                   to="/users"
                   className="flex items-center gap-2 px-3 py-2 text-tkh-grey hover:text-white hover:bg-tkh-blue-medium transition-colors"
-                  title="User Management"
+                  title="Human Resources - User Management"
                 >
                   <Users className="w-4 h-4" />
-                  <span className="hidden md:inline text-sm">Users</span>
+                  <span className="hidden md:inline text-sm">HR 👔</span>
                 </Link>
               )}
 

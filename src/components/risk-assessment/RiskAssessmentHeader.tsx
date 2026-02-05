@@ -1,6 +1,7 @@
 /**
- * Risk Assessment Header Component
- * Shows "Risk Assessment" title with TKH branding and connection status
+ * Risk Assessment Header Component 🦞
+ * See what the risk is up to
+ * Shows Risk Assessment title with TKH branding and connection status
  */
 import { Link } from 'react-router-dom';
 import {
@@ -58,14 +59,14 @@ export function RiskAssessmentHeader({
               className="text-tkh-grey hover:text-white transition-colors flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">Dashboard</span>
+              <span className="text-sm">The Board Room 🏢</span>
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
             <Radio className="w-8 h-8 text-tkh-primary" />
-            Risk Assessment
+            Risk Assessment 🦞
           </h1>
-          <p className="text-tkh-grey mt-1">See what the risk is up to 🦞</p>
+          <p className="text-tkh-grey mt-1">See what the risk is up to</p>
         </div>
 
         {/* Right Section */}

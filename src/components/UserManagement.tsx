@@ -1,6 +1,7 @@
 /**
- * User Management Page
- * Admin-only interface for managing users and roles
+ * Human Resources Page 👔
+ * Admin-only interface for managing the talent
+ * Managing headcount since 2024
  */
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -172,15 +173,15 @@ function UserManagementContent() {
                 className="flex items-center gap-2 text-tkh-grey hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="hidden sm:inline">Back to The Board Room 🏢</span>
               </Link>
               <div className="border-l border-tkh-line-dark h-8" />
               <div>
                 <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                   <Users className="w-7 h-7 text-tkh-primary" />
-                  User Management
+                  Human Resources 👔
                 </h1>
-                <p className="text-tkh-grey mt-1">Manage user accounts and roles</p>
+                <p className="text-tkh-grey mt-1">Managing the talent since 2024</p>
               </div>
             </div>
 

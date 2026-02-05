@@ -1,5 +1,6 @@
 /**
- * Login Page Component
+ * Badge In Page Component 🪪
+ * Tap to enter the building
  * TKH Branded login form with email/password authentication
  */
 import { useState, FormEvent, useEffect } from 'react';
@@ -88,18 +89,18 @@ export function LoginPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Activity className="w-12 h-12 text-tkh-primary" />
             <h1 className="text-4xl font-bold text-white">
-              Mission Control
+              Badge In 🪪
             </h1>
           </div>
           <p className="text-tkh-grey">
-            Agent Status Dashboard
+            Tap to enter the building
           </p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white border border-tkh-line p-8">
           <h2 className="text-2xl font-bold text-tkh-blue mb-6 text-center">
-            Sign In
+            Swipe Your Badge 💳
           </h2>
 
           {/* Error Banner */}
@@ -193,7 +194,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-tkh-grey text-sm mt-6">
-          Mission Control v1.0 • TKH Group
+          Mission Control v1.0 • Fortune 500 AI Oversight Platform 💼
         </p>
       </div>
     </div>
