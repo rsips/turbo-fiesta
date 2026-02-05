@@ -24,4 +24,11 @@ export const config = {
   
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',
+  
+  // Authentication configuration
+  auth: {
+    jwtSecret: process.env.JWT_SECRET || 'change-this-in-production',
+    jwtExpiration: process.env.JWT_EXPIRATION || '24h',
+    bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
+  },
 };

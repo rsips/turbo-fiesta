@@ -5,6 +5,8 @@ import cors from 'cors';
 import { config } from './config';
 import { logger } from './utils/logger';
 import agentsRouter from './routes/agents';
+import { authRouter } from './routes/auth';
+import { authenticateToken, optionalAuth } from './middleware/auth';
 import { gatewayClient } from './services/gateway';
 
 // Initialize Express app
@@ -76,7 +78,8 @@ app.get('/health', async (req: Request, res: Response) => {
 });
 
 // API routes
-app.use('/api/agents', agentsRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/agents', authenticateToken, agentsRouter); // Protected route
 
 // 404 handler
 app.use((req: Request, res: Response) => {

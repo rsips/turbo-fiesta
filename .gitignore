@@ -5,6 +5,9 @@ dist/
 # Environment
 .env
 
+# Data storage (contains user data)
+data/
+
 # Workspace files (OpenClaw agent-specific)
 AGENTS.md
 SOUL.md
