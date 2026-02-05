@@ -10,7 +10,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
 import { 
   AuditLogEntry, 
   AuditLogCreateInput, 
@@ -47,7 +47,7 @@ export class AuditLogService {
    */
   async log(input: AuditLogCreateInput): Promise<AuditLogEntry> {
     const entry: AuditLogEntry = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       userId: input.userId ?? null,
       username: input.username ?? null,

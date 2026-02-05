@@ -4,6 +4,7 @@ import { Router, Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { userStore } from '../services/userStore';
 import { requireRole } from '../middleware/auth';
+import { logAuditEvent } from '../middleware/auditLogger';
 import { UserRole, AuthResponse } from '../types/auth';
 import { logger } from '../utils/logger';
 
@@ -166,6 +167,15 @@ router.put(
       // Update the role
       const updatedUser = await userStore.updateUser(id, { role });
 
+      // Audit: role change
+      await logAuditEvent(
+        req,
+        'user.role.changed',
+        `user:${id}`,
+        'success',
+        `Changed role from ${user.role} to ${role} for user ${user.username}`
+      );
+
       logger.info('Admin updated user role', {
         adminId: req.user!.userId,
         targetUserId: id,
@@ -234,6 +244,15 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     // Delete the user
     const deleted = await userStore.deleteUser(id);
+
+    // Audit: user deletion
+    await logAuditEvent(
+      req,
+      'user.deleted',
+      `user:${id}`,
+      'success',
+      `Deleted user ${user.username}`
+    );
 
     logger.info('Admin deleted user', {
       adminId: req.user!.userId,

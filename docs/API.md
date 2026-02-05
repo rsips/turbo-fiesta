@@ -32,6 +32,8 @@ Authorization: Bearer <your-jwt-token>
 | `GET /api/users/:id` | ✅ | ❌ | ❌ |
 | `PUT /api/users/:id/role` | ✅ | ❌ | ❌ |
 | `DELETE /api/users/:id` | ✅ | ❌ | ❌ |
+| `GET /api/audit-logs` | ✅ | ❌ | ❌ |
+| `GET /api/audit-logs/stats` | ✅ | ❌ | ❌ |
 
 ---
 
@@ -384,6 +386,172 @@ All errors follow this format:
 
 ---
 
+## Audit Log Endpoints (Admin Only)
+
+All audit log endpoints require the `admin` role. Audit logs track security-relevant events for accountability.
+
+### GET /api/audit-logs
+Query audit logs with optional filters.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Query Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `userId` | string | Filter by user ID |
+| `action` | string | Filter by action (comma-separated for multiple) |
+| `startDate` | ISO 8601 | Filter from date |
+| `endDate` | ISO 8601 | Filter to date |
+| `limit` | number | Max results (default 100, max 1000) |
+| `offset` | number | Pagination offset |
+| `result` | string | Filter by result: `success`, `failure`, `denied` |
+
+**Action Types:**
+| Action | Description |
+|--------|-------------|
+| `user.login` | Successful user login |
+| `user.logout` | User logout |
+| `user.login.failed` | Failed login attempt |
+| `user.role.changed` | Admin changed user role |
+| `user.created` | New user registered |
+| `user.deleted` | User account deleted |
+| `agent.stop` | Agent stop action |
+| `agent.restart` | Agent restart action |
+| `agent.message` | Message sent to agent |
+| `agent.connected` | Agent connected |
+| `agent.disconnected` | Agent disconnected |
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "logs": [
+      {
+        "timestamp": "2026-02-05T21:30:00.000Z",
+        "userId": "uuid-123",
+        "username": "johndoe",
+        "action": "user.login",
+        "resource": "auth:johndoe",
+        "result": "success",
+        "ipAddress": "192.168.1.1",
+        "userAgent": "Mozilla/5.0..."
+      },
+      {
+        "timestamp": "2026-02-05T21:25:00.000Z",
+        "userId": null,
+        "username": "unknown",
+        "action": "user.login.failed",
+        "resource": "auth:unknown",
+        "result": "failure",
+        "details": "User not found",
+        "ipAddress": "10.0.0.5"
+      }
+    ],
+    "count": 2,
+    "total": 150,
+    "hasMore": true
+  }
+}
+```
+
+**Example Queries:**
+```bash
+# Get all logs (default limit 100)
+curl http://localhost:8080/api/audit-logs \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+
+# Filter by user
+curl "http://localhost:8080/api/audit-logs?userId=uuid-123" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+
+# Filter by action (multiple)
+curl "http://localhost:8080/api/audit-logs?action=user.login,user.login.failed" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+
+# Filter by date range
+curl "http://localhost:8080/api/audit-logs?startDate=2026-02-01&endDate=2026-02-05" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+
+# Paginate
+curl "http://localhost:8080/api/audit-logs?limit=20&offset=40" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+
+# Filter by result (failed attempts)
+curl "http://localhost:8080/api/audit-logs?result=failure" \
+  -H "Authorization: Bearer $ADMIN_TOKEN"
+```
+
+**Errors:**
+- `401` - Not authenticated
+- `403` - Not an admin
+
+---
+
+### GET /api/audit-logs/stats
+Get audit log statistics for the last 24 hours.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "last24Hours": {
+      "total": 47,
+      "byAction": {
+        "user.login": 15,
+        "user.logout": 12,
+        "user.login.failed": 3,
+        "agent.message": 10,
+        "agent.restart": 5,
+        "user.role.changed": 2
+      },
+      "byResult": {
+        "success": 44,
+        "failure": 3,
+        "denied": 0
+      }
+    }
+  }
+}
+```
+
+---
+
+### Audit Log Properties
+
+Each audit log entry contains:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `timestamp` | ISO 8601 | When the event occurred |
+| `userId` | string/null | User who performed the action (null for anonymous) |
+| `username` | string/null | Username (for easier reading) |
+| `action` | string | Type of action performed |
+| `resource` | string | Target of the action (e.g., `user:123`, `agent:main`) |
+| `result` | string | Outcome: `success`, `failure`, or `denied` |
+| `details` | string | Additional context (no sensitive data) |
+| `ipAddress` | string/null | Client IP address |
+| `userAgent` | string | Client user agent |
+
+### Security Features
+
+- **Immutable**: Logs cannot be modified after creation
+- **Append-only**: Only new logs can be added
+- **No sensitive data**: Passwords, tokens, and secrets are never logged
+- **90-day retention**: Old logs are automatically cleaned up
+- **Async logging**: Logging doesn't block request handling
+
+---
+
 ## Health Check
 
 ### GET /health
@@ -414,6 +582,7 @@ Check API health (no authentication required).
 | `BCRYPT_ROUNDS` | `10` | Password hashing rounds |
 | `DATA_DIR` | `./data` | Directory for data storage |
 | `USER_STORE_PATH` | `./data/users.json` | Path to users file (`:memory:` for testing) |
+| `AUDIT_LOG_PATH` | `./data/audit-logs.json` | Path to audit logs file (`:memory:` for testing) |
 | `GATEWAY_URL` | `http://localhost:18789` | OpenClaw Gateway URL |
 | `USE_MOCK_DATA` | `false` | Use mock data instead of real Gateway |
 | `CORS_ENABLED` | `true` | Enable CORS |

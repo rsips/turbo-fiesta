@@ -11,6 +11,7 @@ import { logger } from '../utils/logger';
 import { config } from '../config';
 import { AgentsResponse, AgentResponse } from '../types/agent';
 import { requireRole } from '../middleware/auth';
+import { logAuditEvent } from '../middleware/auditLogger';
 
 const router = Router();
 
@@ -203,6 +204,15 @@ router.post('/:id/stop', requireRole(['admin', 'operator']), async (req: Request
       const heartbeatAgent = status.heartbeat?.agents?.find((a: any) => a.agentId === agentId);
       const isEnabled = heartbeatAgent?.enabled || false;
 
+      // Audit: agent stop action
+      await logAuditEvent(
+        req,
+        'agent.stop',
+        `agent:${agentId}`,
+        'success',
+        `Checked stop status for agent ${agentId}`
+      );
+
       logger.info('Agent heartbeat status retrieved', { agentId, isEnabled });
 
       res.json({
@@ -219,7 +229,15 @@ router.post('/:id/stop', requireRole(['admin', 'operator']), async (req: Request
         },
       });
     } else {
-      // Mock mode
+      // Mock mode - also audit
+      await logAuditEvent(
+        req,
+        'agent.stop',
+        `agent:${agentId}`,
+        'success',
+        `Checked stop status for agent ${agentId} (mock mode)`
+      );
+
       logger.info('Mock mode: Agent heartbeat status check', { agentId });
       res.json({
         success: true,
@@ -299,6 +317,15 @@ router.post('/:id/restart', requireRole(['admin', 'operator']), async (req: Requ
       const heartbeatAgent = status.heartbeat?.agents?.find((a: any) => a.agentId === agentId);
       const isEnabled = heartbeatAgent?.enabled || false;
 
+      // Audit: agent restart action
+      await logAuditEvent(
+        req,
+        'agent.restart',
+        `agent:${agentId}`,
+        'success',
+        `Checked restart status for agent ${agentId}`
+      );
+
       logger.info('Agent heartbeat status retrieved for restart', { agentId, isEnabled });
 
       res.json({
@@ -315,7 +342,15 @@ router.post('/:id/restart', requireRole(['admin', 'operator']), async (req: Requ
         },
       });
     } else {
-      // Mock mode
+      // Mock mode - also audit
+      await logAuditEvent(
+        req,
+        'agent.restart',
+        `agent:${agentId}`,
+        'success',
+        `Checked restart status for agent ${agentId} (mock mode)`
+      );
+
       logger.info('Mock mode: Agent restart check', { agentId });
       res.json({
         success: true,
@@ -386,6 +421,15 @@ router.post('/:id/message', requireRole(['admin', 'operator']), async (req: Requ
       // Send message to the session
       const result = await gatewayRealClient.sendMessage(session.sessionId, message);
 
+      // Audit: agent message sent
+      await logAuditEvent(
+        req,
+        'agent.message',
+        `agent:${session.agentId}`,
+        'success',
+        `Sent message to agent (${message.length} chars)`
+      );
+
       logger.info('Message sent successfully', { sessionId: session.sessionId });
 
       res.json({
@@ -399,7 +443,15 @@ router.post('/:id/message', requireRole(['admin', 'operator']), async (req: Requ
         },
       });
     } else {
-      // Mock mode
+      // Mock mode - also audit
+      await logAuditEvent(
+        req,
+        'agent.message',
+        `agent:${id}`,
+        'success',
+        `Sent message to agent (${message.length} chars) (mock mode)`
+      );
+
       logger.info('Mock mode: Message send simulated', { id });
       res.json({
         success: true,

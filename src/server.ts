@@ -11,6 +11,7 @@ import agentsRouter from './routes/agents';
 import { authRouter } from './routes/auth';
 import { usersRouter } from './routes/users';
 import agentKeysRouter from './routes/agentKeys';
+import { auditRouter } from './routes/audit';
 import { authenticateToken, optionalAuth } from './middleware/auth';
 import { gatewayClient } from './services/gateway';
 import { initializeWebSocket, getWebSocketManager } from './services/websocket';
@@ -97,6 +98,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', authenticateToken, usersRouter); // Admin-only user management
 app.use('/api/agents', authenticateToken, agentsRouter); // Protected route
 app.use('/api/agent-keys', agentKeysRouter); // Agent API key management
+app.use('/api/audit-logs', authenticateToken, auditRouter); // Admin-only audit logs
 
 // 404 handler
 app.use((req: Request, res: Response) => {

@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import { UserStore, userStore } from '../services/userStore';
 import { generateToken } from '../utils/jwt';
 import { authenticateToken } from '../middleware/auth';
+import { logAuditEvent, logAuditEventWithUser } from '../middleware/auditLogger';
 import { UserRole, AuthResponse, RegisterRequest, LoginRequest } from '../types/auth';
 import { logger } from '../utils/logger';
 
@@ -171,6 +172,17 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
     }
 
     if (!user) {
+      // Audit: failed login - user not found
+      await logAuditEventWithUser(
+        req,
+        null,
+        username || email || null,
+        'user.login.failed',
+        `auth:${username || email || 'unknown'}`,
+        'failure',
+        'User not found'
+      );
+
       const response: AuthResponse = {
         success: false,
         error: {
@@ -185,6 +197,17 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      // Audit: failed login - wrong password
+      await logAuditEventWithUser(
+        req,
+        user.id,
+        user.username,
+        'user.login.failed',
+        `auth:${user.username}`,
+        'failure',
+        'Invalid password'
+      );
+
       logger.warn('Failed login attempt', { username: user.username });
       const response: AuthResponse = {
         success: false,
@@ -203,6 +226,16 @@ router.post('/login', loginValidation, async (req: Request, res: Response) => {
       username: user.username,
       role: user.role,
     });
+
+    // Audit: successful login
+    await logAuditEventWithUser(
+      req,
+      user.id,
+      user.username,
+      'user.login',
+      `auth:${user.username}`,
+      'success'
+    );
 
     logger.info('User logged in', { userId: user.id, username: user.username });
 
@@ -246,6 +279,14 @@ router.post('/logout', authenticateToken, async (req: Request, res: Response) =>
   try {
     const user = req.user!;
     
+    // Audit: user logout
+    await logAuditEvent(
+      req,
+      'user.logout',
+      `auth:${user.username}`,
+      'success'
+    );
+
     logger.info('User logged out', { userId: user.userId, username: user.username });
 
     const response: AuthResponse = {
