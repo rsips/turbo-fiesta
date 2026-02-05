@@ -2,11 +2,26 @@
 node_modules/
 dist/
 
-# Environment
+# Environment & Secrets
 .env
+.env.local
+.env.production
+.env.*.local
 
-# Data storage (contains user data)
+# TLS/SSL Certificates & Keys (SECURITY)
+certs/
+*.key
+*.crt
+*.pem
+*.p12
+*.pfx
+*.csr
+
+# Data storage (contains user data & agent keys)
 data/
+!data/.gitkeep
+agent-keys.json
+users.json
 
 # Workspace files (OpenClaw agent-specific)
 AGENTS.md
@@ -25,3 +40,7 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Temporary
+tmp/
+*.tmp
