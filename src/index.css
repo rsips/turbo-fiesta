@@ -3,12 +3,41 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* TKH Colors */
+  --c-primary: #CCCC00;
+  --c-blue-dark: #1A2638;
+  --c-blue: #1E4466;
+  --c-blue-medium: #183147;
+  --c-blue-light: #326CDB;
+  --c-blue-sky: #21BCFF;
+  --c-green: #00CCB3;
+  --c-white: #FFFFFF;
+  --c-grey: #9FA2A1;
+  --c-grey-light: #DDDDDD;
+  --c-line: #F5F0F0;
+  
+  /* Typography */
+  --font-primary: "Nimbus Sans L", system-ui, sans-serif;
+  --fw-regular: 400;
+  --fw-bold: 700;
+  
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 2.5rem;
+  
+  /* Layout */
+  --border-radius: 0;
+  --wrapper-max-width: 75rem;
+
+  font-family: "Nimbus Sans L", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   
   color-scheme: light;
-  color: rgba(0, 0, 0, 0.87);
+  color: #1E4466;
   background-color: #f9fafb;
 
   font-synthesis: none;
@@ -25,4 +54,33 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+/* TKH Button Styles */
+.btn-primary {
+  @apply bg-tkh-primary text-tkh-blue-dark font-bold py-3 px-6;
+  @apply hover:bg-tkh-primary/90 transition-colors;
+  @apply focus:outline-none focus:ring-2 focus:ring-tkh-primary focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-transparent border-2 border-tkh-primary text-tkh-primary font-bold py-3 px-6;
+  @apply hover:bg-tkh-primary hover:text-tkh-blue-dark transition-colors;
+  @apply focus:outline-none focus:ring-2 focus:ring-tkh-primary focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Input Styles */
+.input-field {
+  @apply w-full px-4 py-3 border border-tkh-grey-light text-tkh-blue;
+  @apply placeholder-tkh-grey;
+  @apply focus:outline-none focus:border-tkh-primary focus:ring-2 focus:ring-tkh-primary/20;
+  @apply disabled:bg-gray-50 disabled:cursor-not-allowed;
+  @apply transition-colors;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white border border-tkh-line p-6;
 }
