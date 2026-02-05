@@ -11,6 +11,7 @@ import { ErrorBanner } from './ErrorBanner';
 import { EmptyState } from './EmptyState';
 import { LoadingSpinner } from './LoadingSpinner';
 import { config } from '../config';
+import { usePermissions } from './RequireRole';
 
 export function AgentDashboard() {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -18,6 +19,7 @@ export function AgentDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const { canManageAgents } = usePermissions();
 
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -93,6 +95,34 @@ export function AgentDashboard() {
     setSelectedAgent(null);
   };
 
+  // Agent action handlers (placeholder implementations)
+  const handleRestartAgent = useCallback(async (agentId: string) => {
+    if (!canManageAgents) return;
+    console.log('Restarting agent:', agentId);
+    // TODO: Implement API call to restart agent
+    // await restartAgent(agentId);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    await fetchAgents(); // Refresh the list
+  }, [canManageAgents, fetchAgents]);
+
+  const handleKillAgent = useCallback(async (agentId: string) => {
+    if (!canManageAgents) return;
+    console.log('Killing agent:', agentId);
+    // TODO: Implement API call to kill agent
+    // await killAgent(agentId);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    await fetchAgents(); // Refresh the list
+  }, [canManageAgents, fetchAgents]);
+
+  const handleStartAgent = useCallback(async (agentId: string) => {
+    if (!canManageAgents) return;
+    console.log('Starting agent:', agentId);
+    // TODO: Implement API call to start agent
+    // await startAgent(agentId);
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    await fetchAgents(); // Refresh the list
+  }, [canManageAgents, fetchAgents]);
+
   const hasActiveFilters = filters.search !== '' || filters.status !== 'all';
 
   return (
@@ -129,11 +159,20 @@ export function AgentDashboard() {
               sortOrder={sort.order}
               onSort={handleSort}
               onAgentClick={handleAgentClick}
+              onRestartAgent={handleRestartAgent}
+              onKillAgent={handleKillAgent}
+              onStartAgent={handleStartAgent}
             />
           </>
         )}
 
-        <AgentDetailModal agent={selectedAgent} onClose={handleCloseModal} />
+        <AgentDetailModal 
+          agent={selectedAgent} 
+          onClose={handleCloseModal}
+          onRestartAgent={handleRestartAgent}
+          onKillAgent={handleKillAgent}
+          onStartAgent={handleStartAgent}
+        />
       </div>
     </div>
   );

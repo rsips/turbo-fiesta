@@ -3,14 +3,26 @@ import { Agent } from '../types/agent';
 import { StatusBadge } from './StatusBadge';
 import { formatAbsoluteTime, formatDuration } from '../utils/formatters';
 import { useState } from 'react';
+import { AgentActions } from './AgentActions';
+import { usePermissions } from './RequireRole';
 
 interface AgentDetailModalProps {
   agent: Agent | null;
   onClose: () => void;
+  onRestartAgent?: (agentId: string) => Promise<void>;
+  onKillAgent?: (agentId: string) => Promise<void>;
+  onStartAgent?: (agentId: string) => Promise<void>;
 }
 
-export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
+export function AgentDetailModal({ 
+  agent, 
+  onClose,
+  onRestartAgent,
+  onKillAgent,
+  onStartAgent,
+}: AgentDetailModalProps) {
   const [copied, setCopied] = useState(false);
+  const { canManageAgents } = usePermissions();
 
   if (!agent) return null;
 
@@ -121,7 +133,22 @@ export function AgentDetailModal({ agent, onClose }: AgentDetailModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 bg-gray-50">
+          {/* Agent Actions (Admin/Operator only) */}
+          <div>
+            {canManageAgents ? (
+              <AgentActions
+                agent={agent}
+                variant="detail"
+                onRestart={onRestartAgent}
+                onKill={onKillAgent}
+                onStart={onStartAgent}
+              />
+            ) : (
+              <span className="text-sm text-gray-500 italic">View only mode</span>
+            )}
+          </div>
+
           <button
             onClick={onClose}
             className="px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 rounded-lg transition-colors"

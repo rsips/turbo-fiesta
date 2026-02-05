@@ -2,9 +2,12 @@
  * Dashboard Header Component
  * Shows Mission Control title, user info, and controls
  */
-import { RefreshCw, Activity, LogOut, User, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { RefreshCw, Activity, LogOut, User, Shield, Users, Eye } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 import { useAuth } from '../contexts/AuthContext';
+import { usePermissions } from './RequireRole';
+import { RoleBadge } from './RoleBadge';
 
 interface DashboardHeaderProps {
   isRefreshing: boolean;
@@ -12,16 +15,10 @@ interface DashboardHeaderProps {
   onManualRefresh: () => void;
 }
 
-const roleColors: Record<string, string> = {
-  admin: 'bg-red-100 text-red-800 border-red-200',
-  operator: 'bg-blue-100 text-blue-800 border-blue-200',
-  viewer: 'bg-gray-100 text-gray-800 border-gray-200',
-};
-
 const roleIcons: Record<string, typeof Shield> = {
   admin: Shield,
   operator: User,
-  viewer: User,
+  viewer: Eye,
 };
 
 export function DashboardHeader({
@@ -30,6 +27,7 @@ export function DashboardHeader({
   onManualRefresh,
 }: DashboardHeaderProps) {
   const { user, logout, isAuthenticated } = useAuth();
+  const { canManageUsers } = usePermissions();
 
   const RoleIcon = user ? roleIcons[user.role] || User : User;
 
@@ -67,6 +65,18 @@ export function DashboardHeader({
           {/* User Info & Logout */}
           {isAuthenticated && user && (
             <div className="flex items-center gap-3 pl-4 border-l border-tkh-line-dark">
+              {/* Admin: User Management Link */}
+              {canManageUsers && (
+                <Link
+                  to="/users"
+                  className="flex items-center gap-2 px-3 py-2 text-tkh-grey hover:text-white hover:bg-tkh-blue-medium transition-colors"
+                  title="User Management"
+                >
+                  <Users className="w-4 h-4" />
+                  <span className="hidden md:inline text-sm">Users</span>
+                </Link>
+              )}
+
               {/* User Badge */}
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-tkh-blue-medium rounded-full flex items-center justify-center">
@@ -75,9 +85,7 @@ export function DashboardHeader({
                 <div className="hidden sm:block">
                   <div className="text-white text-sm font-bold">{user.name}</div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-0.5 border capitalize ${roleColors[user.role]}`}>
-                      {user.role}
-                    </span>
+                    <RoleBadge role={user.role} size="sm" showIcon={false} />
                   </div>
                 </div>
               </div>

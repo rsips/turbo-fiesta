@@ -2,6 +2,8 @@ import { Agent, SortField, SortOrder } from '../types/agent';
 import { StatusBadge } from './StatusBadge';
 import { formatRelativeTime, formatDuration, truncateText, formatAbsoluteTime } from '../utils/formatters';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { AgentActions, ViewerModeIndicator } from './AgentActions';
+import { usePermissions } from './RequireRole';
 
 interface AgentListTableProps {
   agents: Agent[];
@@ -9,6 +11,9 @@ interface AgentListTableProps {
   sortOrder: SortOrder;
   onSort: (field: SortField) => void;
   onAgentClick: (agent: Agent) => void;
+  onRestartAgent?: (agentId: string) => Promise<void>;
+  onKillAgent?: (agentId: string) => Promise<void>;
+  onStartAgent?: (agentId: string) => Promise<void>;
 }
 
 interface SortableHeaderProps {
@@ -49,7 +54,12 @@ export function AgentListTable({
   sortOrder,
   onSort,
   onAgentClick,
+  onRestartAgent,
+  onKillAgent,
+  onStartAgent,
 }: AgentListTableProps) {
+  const { canManageAgents } = usePermissions();
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -87,6 +97,9 @@ export function AgentListTable({
                 currentOrder={sortOrder}
                 onSort={onSort}
               />
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -125,6 +138,19 @@ export function AgentListTable({
                   <div className="text-sm text-gray-900">
                     {formatDuration(agent.uptime_seconds)}
                   </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  {canManageAgents ? (
+                    <AgentActions
+                      agent={agent}
+                      variant="row"
+                      onRestart={onRestartAgent}
+                      onKill={onKillAgent}
+                      onStart={onStartAgent}
+                    />
+                  ) : (
+                    <ViewerModeIndicator />
+                  )}
                 </td>
               </tr>
             ))}

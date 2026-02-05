@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './components/LoginPage';
 import { AgentDashboard } from './components/AgentDashboard';
+import { UserManagement } from './components/UserManagement';
 import './index.css';
 
 function App() {
@@ -23,6 +24,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <AgentDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Route - User Management (Admin Only) */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <UserManagement />
               </ProtectedRoute>
             }
           />
