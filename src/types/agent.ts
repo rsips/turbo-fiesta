@@ -44,3 +44,21 @@ export interface AgentResponse {
     details?: string;
   };
 }
+
+// Agent control action response types
+export interface AgentActionResponse {
+  success: boolean;
+  data?: {
+    agentId?: string;
+    sessionId?: string;
+    action: 'stop' | 'restart' | 'message' | 'settings';
+    result: string;
+    updatedSettings?: Record<string, any>;
+    timestamp: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: string;
+  };
+}

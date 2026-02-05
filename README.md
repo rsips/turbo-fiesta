@@ -4,9 +4,18 @@ Express.js API that adapts OpenClaw Gateway data for the Mission Control fronten
 
 ## Features
 
+### Read Operations
 - **GET /api/agents** - List all agents with status, current task, and metadata
 - **GET /api/agents/:id** - Get detailed information for a specific agent
 - **GET /health** - Health check endpoint with Gateway connectivity status
+
+### Control Operations (New in Phase 2! 🚀)
+- **POST /api/agents/:id/stop** - Check agent heartbeat status (with CLI guidance)
+- **POST /api/agents/:id/restart** - Check agent heartbeat status for restart
+- **POST /api/agents/:id/message** - Send a message to a specific agent session
+- **GET /api/agents/:id/settings** - Get agent configuration settings
+
+### Infrastructure
 - **Schema transformation** - Converts Gateway format to Mission Control format
 - **In-memory caching** - 5-second TTL to reduce Gateway load
 - **Mock data support** - Develop without Gateway dependency
@@ -77,7 +86,9 @@ src/
 
 ## API Documentation
 
-### GET /api/agents
+### Read Endpoints
+
+#### GET /api/agents
 
 Returns list of all agents.
 
@@ -116,7 +127,7 @@ Returns list of all agents.
 - `offline` - Agent disconnected or stopped
 - `error` - Agent in error state
 
-### GET /api/agents/:id
+#### GET /api/agents/:id
 
 Returns detailed information for a specific agent.
 
@@ -137,7 +148,7 @@ Returns detailed information for a specific agent.
 }
 ```
 
-### GET /health
+#### GET /health
 
 Health check endpoint.
 
@@ -153,6 +164,171 @@ Health check endpoint.
   }
 }
 ```
+
+### Control Endpoints (Phase 2)
+
+#### POST /api/agents/:id/stop
+
+Check agent heartbeat status and get guidance on how to disable it via CLI.
+
+**Note:** OpenClaw doesn't expose a direct API to disable agent heartbeats. This endpoint provides visibility and CLI instructions.
+
+**Parameters:**
+- `id` - Agent session ID or session key
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "agentId": "main",
+    "action": "stop-check",
+    "heartbeatEnabled": true,
+    "heartbeatInterval": "30m",
+    "message": "Agent heartbeat is currently enabled. Use CLI to disable: openclaw system heartbeat disable",
+    "timestamp": "2026-02-05T20:30:00Z"
+  }
+}
+```
+
+**Use Cases:**
+- Check if an agent's heartbeat is enabled
+- Get CLI instructions to disable heartbeat
+- Monitor heartbeat status before maintenance
+
+#### POST /api/agents/:id/restart
+
+Check agent heartbeat status and get guidance on how to enable it via CLI.
+
+**Note:** OpenClaw doesn't expose a direct API to enable agent heartbeats. This endpoint provides visibility and CLI instructions.
+
+**Parameters:**
+- `id` - Agent session ID or session key
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "agentId": "backend-dev",
+    "action": "restart-check",
+    "heartbeatEnabled": false,
+    "heartbeatInterval": "disabled",
+    "message": "Agent heartbeat is disabled. Use CLI to enable: openclaw system heartbeat enable",
+    "timestamp": "2026-02-05T20:30:00Z"
+  }
+}
+```
+
+**Use Cases:**
+- Check if an agent's heartbeat is disabled
+- Get CLI instructions to enable heartbeat
+- Verify heartbeat status after changes
+
+#### POST /api/agents/:id/message
+
+Send a message to a specific agent session.
+
+**Parameters:**
+- `id` - Agent session ID or session key
+
+**Request Body:**
+```json
+{
+  "message": "Check inbox and summarize important emails"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "sessionId": "8e8aaf0c-d455-42af-ba7c-6a668f5bd8ee",
+    "agentId": "main",
+    "action": "message",
+    "result": "Message sent to agent session",
+    "timestamp": "2026-02-05T20:30:00Z"
+  }
+}
+```
+
+**Use Cases:**
+- Send commands to specific agent instances
+- Trigger agent actions from external systems
+- Inject tasks into running sessions
+
+#### GET /api/agents/:id/settings
+
+Get agent configuration settings including model, context tokens, heartbeat settings, and token usage.
+
+**Parameters:**
+- `id` - Agent session ID or session key
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "agentId": "main",
+    "action": "settings",
+    "settings": {
+      "agentId": "main",
+      "model": "claude-opus-4-5-20251101",
+      "contextTokens": 200000,
+      "heartbeat": {
+        "enabled": true,
+        "interval": "30m",
+        "intervalMs": 1800000
+      },
+      "session": {
+        "totalTokens": 147589,
+        "remainingTokens": 52411,
+        "percentUsed": 74
+      }
+    },
+    "timestamp": "2026-02-05T20:30:00Z"
+  }
+}
+```
+
+**Settings Provided:**
+- `model` - Current AI model in use
+- `contextTokens` - Maximum context window size
+- `heartbeat` - Heartbeat configuration (enabled, interval)
+- `session` - Token usage statistics
+
+**Use Cases:**
+- Monitor agent resource usage
+- Check current model and capabilities
+- View heartbeat configuration
+- Track context window utilization
+
+### Error Responses
+
+All endpoints return consistent error responses:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": "Additional context or technical details"
+  }
+}
+```
+
+**Common Error Codes:**
+- `AGENT_NOT_FOUND` (404) - Agent/session doesn't exist
+- `SESSION_NOT_FOUND` (404) - Session ID not found
+- `INVALID_AGENT_ID` (400) - Invalid ID format
+- `INVALID_MESSAGE` (400) - Empty or invalid message
+- `INVALID_SETTINGS` (400) - Empty or invalid settings object
+- `STOP_FAILED` (500) - Failed to stop agent
+- `RESTART_FAILED` (500) - Failed to restart agent
+- `MESSAGE_FAILED` (500) - Failed to send message
+- `SETTINGS_UPDATE_FAILED` (500) - Failed to update settings
 
 ## Configuration
 
