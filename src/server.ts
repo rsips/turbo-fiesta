@@ -2,11 +2,15 @@
 
 import express, { Request, Response } from 'express';
 import { createServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
+import * as fs from 'fs';
 import cors from 'cors';
 import { config } from './config';
 import { logger } from './utils/logger';
 import agentsRouter from './routes/agents';
 import { authRouter } from './routes/auth';
+import { usersRouter } from './routes/users';
+import agentKeysRouter from './routes/agentKeys';
 import { authenticateToken, optionalAuth } from './middleware/auth';
 import { gatewayClient } from './services/gateway';
 import { initializeWebSocket, getWebSocketManager } from './services/websocket';
@@ -90,7 +94,9 @@ app.get('/health', async (req: Request, res: Response) => {
 
 // API routes
 app.use('/api/auth', authRouter);
+app.use('/api/users', authenticateToken, usersRouter); // Admin-only user management
 app.use('/api/agents', authenticateToken, agentsRouter); // Protected route
+app.use('/api/agent-keys', agentKeysRouter); // Agent API key management
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -118,20 +124,50 @@ app.use((err: Error, req: Request, res: Response, next: any) => {
   });
 });
 
-// Create HTTP server and attach WebSocket
-const httpServer = createServer(app);
+// Create HTTP/HTTPS server
+let httpServer: ReturnType<typeof createServer> | ReturnType<typeof createHttpsServer>;
+
+if (config.tls.enabled) {
+  try {
+    // Load TLS certificates
+    const tlsOptions = {
+      key: fs.readFileSync(config.tls.keyPath),
+      cert: fs.readFileSync(config.tls.certPath),
+    };
+    
+    httpServer = createHttpsServer(tlsOptions, app);
+    logger.info('TLS/HTTPS enabled', { 
+      certPath: config.tls.certPath,
+      keyPath: config.tls.keyPath,
+    });
+  } catch (error: any) {
+    logger.error('Failed to load TLS certificates, falling back to HTTP', { 
+      error: error.message,
+      certPath: config.tls.certPath,
+      keyPath: config.tls.keyPath,
+    });
+    httpServer = createServer(app);
+  }
+} else {
+  httpServer = createServer(app);
+  logger.info('TLS/HTTPS disabled, using HTTP');
+}
 
 // Initialize WebSocket server
 const wsManager = initializeWebSocket(httpServer);
 
 // Start server
 const server = httpServer.listen(config.port, () => {
+  const protocol = config.tls.enabled ? 'https' : 'http';
   logger.info('Mission Control Backend API started', {
+    url: `${protocol}://localhost:${config.port}`,
     port: config.port,
+    protocol,
     gatewayUrl: config.gateway.baseUrl,
     useMockData: process.env.USE_MOCK_DATA === 'true',
     environment: process.env.NODE_ENV || 'development',
     websocket: 'enabled',
+    agentAuth: config.agentAuth.enabled,
   });
 });
 

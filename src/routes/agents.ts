@@ -10,8 +10,13 @@ import { cache } from '../utils/cache';
 import { logger } from '../utils/logger';
 import { config } from '../config';
 import { AgentsResponse, AgentResponse } from '../types/agent';
+import { requireRole } from '../middleware/auth';
 
 const router = Router();
+
+// Role-based access control:
+// - GET (viewing): all authenticated users
+// - POST (control actions): admin or operator only
 
 // Environment flag to use mock data
 const USE_MOCK_DATA = process.env.USE_MOCK_DATA === 'true';
@@ -153,8 +158,10 @@ router.get('/:id', async (req: Request, res: Response) => {
  * Note: OpenClaw doesn't expose a direct API to disable agent heartbeats.
  * Heartbeat control is done via CLI: `openclaw system heartbeat disable`
  * or by modifying the agent's HEARTBEAT.md file.
+ * 
+ * Requires: admin or operator role
  */
-router.post('/:id/stop', async (req: Request, res: Response) => {
+router.post('/:id/stop', requireRole(['admin', 'operator']), async (req: Request, res: Response) => {
   try {
     const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
 
@@ -247,8 +254,10 @@ router.post('/:id/stop', async (req: Request, res: Response) => {
  * Note: OpenClaw doesn't expose a direct API to enable agent heartbeats.
  * Heartbeat control is done via CLI: `openclaw system heartbeat enable`
  * or by adding tasks to the agent's HEARTBEAT.md file.
+ * 
+ * Requires: admin or operator role
  */
-router.post('/:id/restart', async (req: Request, res: Response) => {
+router.post('/:id/restart', requireRole(['admin', 'operator']), async (req: Request, res: Response) => {
   try {
     const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
 
@@ -337,8 +346,10 @@ router.post('/:id/restart', async (req: Request, res: Response) => {
 /**
  * POST /api/agents/:id/message
  * Send a message to a specific agent session
+ * 
+ * Requires: admin or operator role
  */
-router.post('/:id/message', async (req: Request, res: Response) => {
+router.post('/:id/message', requireRole(['admin', 'operator']), async (req: Request, res: Response) => {
   try {
     const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
     const { message } = req.body;

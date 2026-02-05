@@ -15,8 +15,23 @@ Authorization: Bearer <your-jwt-token>
 
 ### Roles
 - **admin**: Full access to all features including user management
-- **operator**: Can manage agents, trigger actions, view logs
-- **viewer**: Read-only access to dashboard
+- **operator**: Can manage agents (restart, stop, message), view logs
+- **viewer**: Read-only access to dashboard and agent data
+
+### Role-Based Access Control (RBAC)
+
+| Endpoint | Admin | Operator | Viewer |
+|----------|-------|----------|--------|
+| `GET /api/agents` | ✅ | ✅ | ✅ |
+| `GET /api/agents/:id` | ✅ | ✅ | ✅ |
+| `GET /api/agents/:id/settings` | ✅ | ✅ | ✅ |
+| `POST /api/agents/:id/stop` | ✅ | ✅ | ❌ |
+| `POST /api/agents/:id/restart` | ✅ | ✅ | ❌ |
+| `POST /api/agents/:id/message` | ✅ | ✅ | ❌ |
+| `GET /api/users` | ✅ | ❌ | ❌ |
+| `GET /api/users/:id` | ✅ | ❌ | ❌ |
+| `PUT /api/users/:id/role` | ✅ | ❌ | ❌ |
+| `DELETE /api/users/:id` | ✅ | ❌ | ❌ |
 
 ---
 
@@ -170,17 +185,169 @@ Authorization: Bearer <token>
 ### GET /api/agents/:id
 Get agent details.
 
+**Required Role:** Any authenticated user
+
 ### POST /api/agents/:id/message
 Send a message to an agent.
+
+**Required Role:** `admin` or `operator`
 
 ### GET /api/agents/:id/settings
 Get agent settings.
 
+**Required Role:** Any authenticated user
+
 ### POST /api/agents/:id/stop
 Check agent heartbeat status (stop action).
 
+**Required Role:** `admin` or `operator`
+
 ### POST /api/agents/:id/restart
 Check agent heartbeat status (restart action).
+
+**Required Role:** `admin` or `operator`
+
+---
+
+## User Management Endpoints (Admin Only)
+
+All user management endpoints require the `admin` role.
+
+### GET /api/users
+List all users.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "users": [
+      {
+        "id": "uuid-1",
+        "username": "admin",
+        "email": "admin@example.com",
+        "role": "admin",
+        "createdAt": "2026-02-05T20:00:00.000Z"
+      },
+      {
+        "id": "uuid-2",
+        "username": "operator1",
+        "email": "operator@example.com",
+        "role": "operator",
+        "createdAt": "2026-02-05T21:00:00.000Z"
+      }
+    ],
+    "count": 2
+  }
+}
+```
+
+**Errors:**
+- `401` - Not authenticated
+- `403` - Not an admin
+
+---
+
+### GET /api/users/:id
+Get single user details.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "username": "operator1",
+      "email": "operator@example.com",
+      "role": "operator",
+      "createdAt": "2026-02-05T21:00:00.000Z"
+    }
+  }
+}
+```
+
+**Errors:**
+- `401` - Not authenticated
+- `403` - Not an admin
+- `404` - User not found
+
+---
+
+### PUT /api/users/:id/role
+Update a user's role.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Request Body:**
+```json
+{
+  "role": "operator"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "uuid",
+      "username": "viewer1",
+      "email": "viewer@example.com",
+      "role": "operator",
+      "createdAt": "2026-02-05T21:00:00.000Z"
+    },
+    "message": "User role updated from viewer to operator"
+  }
+}
+```
+
+**Errors:**
+- `400` - Invalid role (`INVALID_ROLE`)
+- `400` - Cannot demote yourself (`CANNOT_DEMOTE_SELF`)
+- `401` - Not authenticated
+- `403` - Not an admin
+- `404` - User not found
+
+---
+
+### DELETE /api/users/:id
+Delete a user.
+
+**Headers:**
+```
+Authorization: Bearer <admin-token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "User viewer1 has been deleted"
+  }
+}
+```
+
+**Errors:**
+- `400` - Cannot delete yourself (`CANNOT_DELETE_SELF`)
+- `401` - Not authenticated
+- `403` - Not an admin
+- `404` - User not found
 
 ---
 
@@ -203,11 +370,15 @@ All errors follow this format:
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
 | `VALIDATION_ERROR` | 400 | Invalid input data |
+| `INVALID_ROLE` | 400 | Invalid role specified |
+| `CANNOT_DEMOTE_SELF` | 400 | Admin cannot demote themselves |
+| `CANNOT_DELETE_SELF` | 400 | Admin cannot delete themselves |
 | `NO_TOKEN` | 401 | Authorization header missing |
 | `INVALID_TOKEN` | 401 | Token is invalid or expired |
 | `INVALID_CREDENTIALS` | 401 | Wrong username/password |
-| `FORBIDDEN` | 403 | Insufficient permissions |
+| `FORBIDDEN` | 403 | Insufficient permissions (wrong role) |
 | `NOT_FOUND` | 404 | Resource not found |
+| `USER_NOT_FOUND` | 404 | User not found |
 | `USER_EXISTS` | 409 | Username/email already taken |
 | `INTERNAL_ERROR` | 500 | Server error |
 
