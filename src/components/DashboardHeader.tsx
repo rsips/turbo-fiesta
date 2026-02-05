@@ -3,7 +3,7 @@
  * Shows Mission Control title, user info, and controls
  */
 import { Link } from 'react-router-dom';
-import { RefreshCw, Activity, LogOut, User, Shield, Users, Eye } from 'lucide-react';
+import { RefreshCw, Activity, LogOut, User, Shield, Users, Eye, Radio } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 import { useAuth } from '../contexts/AuthContext';
 import { usePermissions } from './RequireRole';
@@ -65,6 +65,16 @@ export function DashboardHeader({
           {/* User Info & Logout */}
           {isAuthenticated && user && (
             <div className="flex items-center gap-3 pl-4 border-l border-tkh-line-dark">
+              {/* Risk Assessment Link */}
+              <Link
+                to="/risk-assessment"
+                className="flex items-center gap-2 px-3 py-2 text-tkh-grey hover:text-white hover:bg-tkh-blue-medium transition-colors"
+                title="Agent Activity Feed"
+              >
+                <Radio className="w-4 h-4" />
+                <span className="hidden md:inline text-sm">Risk Assessment</span>
+              </Link>
+
               {/* Admin: User Management Link */}
               {canManageUsers && (
                 <Link

@@ -8,6 +8,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './components/LoginPage';
 import { AgentDashboard } from './components/AgentDashboard';
 import { UserManagement } from './components/UserManagement';
+import { RiskAssessmentPage } from './components/risk-assessment';
 import './index.css';
 
 function App() {
@@ -24,6 +25,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <AgentDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Protected Route - Risk Assessment (Activity Feed) */}
+          <Route
+            path="/risk-assessment"
+            element={
+              <ProtectedRoute>
+                <RiskAssessmentPage />
               </ProtectedRoute>
             }
           />
