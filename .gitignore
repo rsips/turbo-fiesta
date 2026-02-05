@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+dist/
+
+# Environment
+.env
+
+# Workspace files (OpenClaw agent-specific)
+AGENTS.md
+SOUL.md
+TOOLS.md
+USER.md
+IDENTITY.md
+HEARTBEAT.md
+BOOTSTRAP.md
+memory/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

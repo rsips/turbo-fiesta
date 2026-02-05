@@ -1,0 +1,96 @@
+{
+  "comment": "Sample /api/agents response - Use this for TypeScript types and UI mockups",
+  "success": true,
+  "data": {
+    "agents": [
+      {
+        "id": "agent:main:msteams:group:19:0cc3b64020df41f9acf7ffac5cee62a9@thread.v2",
+        "name": "Main Agent",
+        "session_id": "8e8aaf0c-d455-42af-ba7c-6a668f5bd8ee",
+        "status": "online",
+        "current_task": "Context: 82% used (164,717 tokens)",
+        "task_started_at": "2026-02-05T20:01:25Z",
+        "last_activity": "2026-02-05T20:01:30Z",
+        "started_at": "2026-02-05T16:30:00Z",
+        "uptime_seconds": 12690,
+        "metadata": {
+          "agentId": "main",
+          "kind": "group",
+          "model": "claude-sonnet-4-5-20250929",
+          "totalTokens": 164717,
+          "remainingTokens": 35283,
+          "percentUsed": 82,
+          "contextTokens": 200000,
+          "flags": ["system", "id:8e8aaf0c-d455-42af-ba7c-6a668f5bd8ee"],
+          "abortedLastRun": false
+        }
+      },
+      {
+        "id": "agent:frontend-dev:subagent:92adae0f-4817-4ed4-850b-72885824bc03",
+        "name": "Frontend Dev Agent",
+        "session_id": "4747defd-5953-4724-9fcc-ad2b02270ab5",
+        "status": "busy",
+        "current_task": "Processing (229 tokens output)",
+        "task_started_at": "2026-02-05T20:28:15Z",
+        "last_activity": "2026-02-05T20:28:18Z",
+        "started_at": "2026-02-05T20:28:18Z",
+        "uptime_seconds": 3,
+        "metadata": {
+          "agentId": "frontend-dev",
+          "kind": "direct",
+          "model": "claude-sonnet-4-5-20250929",
+          "totalTokens": 46412,
+          "remainingTokens": 153588,
+          "percentUsed": 23,
+          "contextTokens": 200000,
+          "flags": ["id:4747defd-5953-4724-9fcc-ad2b02270ab5"]
+        }
+      },
+      {
+        "id": "agent:backend-dev:subagent:809e5c6f-4866-4609-8e34-8318f3967a7a",
+        "name": "Backend Dev Agent",
+        "session_id": "30edb6ef-41d8-44c3-9fdc-4186f09685d2",
+        "status": "offline",
+        "current_task": null,
+        "task_started_at": null,
+        "last_activity": "2026-02-05T20:23:45Z",
+        "started_at": "2026-02-05T20:23:45Z",
+        "uptime_seconds": 289,
+        "metadata": {
+          "agentId": "backend-dev",
+          "kind": "direct",
+          "model": "claude-sonnet-4-5-20250929",
+          "totalTokens": 0,
+          "remainingTokens": 200000,
+          "percentUsed": 0,
+          "contextTokens": 200000,
+          "flags": ["id:30edb6ef-41d8-44c3-9fdc-4186f09685d2"]
+        }
+      },
+      {
+        "id": "agent:architect:subagent:07840045-730f-46e4-a016-cd1e833d2a75",
+        "name": "Architect Agent",
+        "session_id": "cf8be841-4963-4c25-afc6-a92a032749d3",
+        "status": "error",
+        "current_task": null,
+        "task_started_at": null,
+        "last_activity": "2026-02-05T20:12:42Z",
+        "started_at": "2026-02-05T20:12:42Z",
+        "uptime_seconds": 652,
+        "metadata": {
+          "agentId": "architect",
+          "kind": "direct",
+          "model": "claude-sonnet-4-5-20250929",
+          "totalTokens": 5630,
+          "remainingTokens": 194370,
+          "percentUsed": 3,
+          "contextTokens": 200000,
+          "flags": ["aborted", "id:cf8be841-4963-4c25-afc6-a92a032749d3"],
+          "abortedLastRun": true
+        }
+      }
+    ],
+    "count": 4,
+    "timestamp": "2026-02-05T20:33:00.000Z"
+  }
+}
