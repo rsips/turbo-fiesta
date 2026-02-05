@@ -1,115 +1,86 @@
 # Quick Start Guide
 
-Get the Mission Control dashboard running in 60 seconds!
+Get the Mission Control Frontend running in 3 minutes.
 
-## TL;DR
+## Prerequisites
 
-```bash
-cd /home/sky/.openclaw/workspace/mission-control/frontend
-npm install    # Already done
-npm run dev    # Open http://localhost:3000
-```
+- Node.js 18+ installed
+- Backend API running on port 8080
 
-That's it! You'll see 7 mock agents in the dashboard.
-
-## What You Get
-
-✅ Real-time agent status dashboard  
-✅ Search and filter agents  
-✅ Sort by any column  
-✅ Auto-refresh every 5 seconds  
-✅ Click agents for details  
-✅ Fully functional with mock data  
-
-## Available Commands
+## Step 1: Install Dependencies
 
 ```bash
-npm run dev      # Start dev server (port 3000)
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run lint     # Run ESLint
-```
-
-## Connect to Backend
-
-When your backend is ready:
-
-1. Open `src/api/client.ts`
-2. Change line 6: `const USE_MOCK_DATA = false;`
-3. Ensure backend runs on `http://localhost:8080`
-4. Refresh browser
-
-## Features to Try
-
-- **Search:** Type in the search box to filter by name
-- **Filter:** Select a status from dropdown
-- **Sort:** Click any column header
-- **Refresh:** Click refresh button or watch auto-refresh
-- **Details:** Click any agent row to see full details
-- **Copy ID:** Click copy button in modal to copy session ID
-
-## Mock Data
-
-Default mock includes:
-- 1 Main Agent (busy)
-- 1 Architect (online)
-- 1 PM (busy)
-- 1 Frontend Dev (busy) - that's me!
-- 1 Backend Dev (offline)
-- 1 System Monitor (error)
-- 1 Scheduler (online)
-
-## Project Structure
-
-```
-src/
-├── components/      # React components
-├── api/            # API client (toggle mock here)
-├── mocks/          # Sample data
-├── types/          # TypeScript types
-└── utils/          # Formatting & sorting
-```
-
-## Documentation
-
-- **Full docs:** See `README.md`
-- **Status:** See `PROJECT_STATUS.md`
-- **Deliverables:** See `DELIVERABLES.md`
-
-## Troubleshooting
-
-**Port 3000 in use?**
-```bash
-# Kill process on port 3000
-lsof -ti:3000 | xargs kill -9
-```
-
-**Dependencies issue?**
-```bash
-rm -rf node_modules package-lock.json
 npm install
 ```
 
-**Build fails?**
+## Step 2: Start Development Server
+
+```bash
+npm run dev
+```
+
+The app will open at **http://localhost:3000**
+
+## Step 3: Verify Backend Connection
+
+The frontend needs the backend API running:
+
+```bash
+# In a separate terminal, check backend status:
+curl http://localhost:8080/health
+
+# Expected response:
+# {"status":"ok","timestamp":"...","gateway":"..."}
+```
+
+If backend is not running:
+
+```bash
+cd ../backend
+npm install
+npm run dev
+```
+
+## You're Done! 🎉
+
+Visit **http://localhost:3000** to see the dashboard.
+
+## Quick Test
+
+1. Dashboard loads with agent list
+2. Search for an agent by name
+3. Filter by status (try "Busy")
+4. Click an agent row to see details
+5. Watch the data auto-refresh every 5 seconds
+
+## Common Issues
+
+**"Cannot connect to API"**
+- Backend not running → Start backend: `cd ../backend && npm run dev`
+- Wrong port → Check backend is on 8080
+
+**Empty agent list**
+- No agents running → Backend should have mock data
+- Check: `curl http://localhost:8080/api/agents`
+
+**Build errors**
+- Delete node_modules: `rm -rf node_modules`
+- Reinstall: `npm install`
+
+## Build for Production
+
 ```bash
 npm run build
-# Check error message, likely TypeScript error
 ```
+
+Built files will be in `dist/` directory.
 
 ## Next Steps
 
-1. ✅ Run dev server → See mock agents
-2. ✅ Try all features → Verify they work
-3. ⏳ Connect to backend → Toggle mock off
-4. ⏳ Integration test → Test with real data
-5. ⏳ Deploy → Build and serve
-
-## Support
-
-Questions? Check the docs or contact:
-- Frontend Developer Agent
-- Orchestrator
+- Read full [README.md](./README.md) for details
+- Check [DELIVERABLES.md](./DELIVERABLES.md) for feature list
+- Review [manual testing checklist](./README.md#manual-testing-checklist)
 
 ---
 
-**Have fun! The dashboard is fully functional.** 🚀
+**Need help?** Check the [Troubleshooting section](./README.md#troubleshooting) in README.md
