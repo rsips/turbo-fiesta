@@ -12,7 +12,8 @@
     "test:watch": "jest --watch --runInBand",
     "test:coverage": "jest --coverage --runInBand",
     "generate-certs": "./scripts/generate-certs.sh",
-    "create-agent-key": "ts-node scripts/create-agent-key.ts"
+    "create-agent-key": "ts-node scripts/create-agent-key.ts",
+    "create-admin": "ts-node scripts/create-admin.ts"
   },
   "keywords": [
     "mission-control",

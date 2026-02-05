@@ -100,17 +100,43 @@ app.use('/api/agents', authenticateToken, agentsRouter); // Protected route
 app.use('/api/agent-keys', agentKeysRouter); // Agent API key management
 app.use('/api/audit-logs', authenticateToken, auditRouter); // Admin-only audit logs
 
-// 404 handler
-app.use((req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    error: {
-      code: 'NOT_FOUND',
-      message: 'Endpoint not found',
-      details: `${req.method} ${req.path} does not exist`,
-    },
+// Serve static frontend files (production)
+const publicPath = require('path').join(__dirname, '..', 'public');
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+  
+  // SPA fallback - serve index.html for all non-API routes
+  app.use((req: Request, res: Response, next) => {
+    // Don't serve index.html for API routes
+    if (req.path.startsWith('/api/')) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: 'NOT_FOUND',
+          message: 'API endpoint not found',
+          details: `${req.method} ${req.path} does not exist`,
+        },
+      });
+    }
+    
+    // Serve index.html for all other routes (SPA)
+    res.sendFile(require('path').join(publicPath, 'index.html'));
   });
-});
+  
+  logger.info('Serving static frontend files', { path: publicPath });
+} else {
+  // 404 handler (when no frontend is deployed)
+  app.use((req: Request, res: Response) => {
+    res.status(404).json({
+      success: false,
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Endpoint not found',
+        details: `${req.method} ${req.path} does not exist`,
+      },
+    });
+  });
+}
 
 // Error handler
 app.use((err: Error, req: Request, res: Response, next: any) => {
